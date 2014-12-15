@@ -21,6 +21,7 @@ local _W, _H = display.contentWidth, display.contentHeight
 local background
 local oneJump --Button that makes character jump once
 local twoJump --Button that makes character jump twice
+local restart --Button that restarts game
 local player --The character/player
 local gameOverText
 local column1
@@ -36,6 +37,7 @@ local scoreText
 local gaps = {100,160} --The amount of space between each column
 local countdown = 3 --Countdown of time between jumps
 local isClickable = true --Allows click of buttons
+local timerCountdown
 
 --Functions for the buttons
 function countdownTimer( event )
@@ -103,6 +105,10 @@ function twoTouch( event )
 	end
 end
 
+function restartTouch( event )
+	composer.gotoScene( "restart", "fade", 500 )
+end
+
 --Move the columns when they get off screen
 function moveColumn( event )
 	if column1.x < 0 then
@@ -134,11 +140,13 @@ function moveColumn( event )
 		column7.x = column6.x + gaps[chooseGap]
 	end
 	if player.y > _H/2+20 then
-		gameOverText.alpha = 1		
+		gameOverText.alpha = 1	
+		restart.alpha = 1	
 		isClickable = false
 	end
 	if countdown < 1 then
-		gameOverText.alpha = 1		
+		gameOverText.alpha = 1	
+		restart.alpha = 1	
 		isClickable = false
 	end
 end
@@ -169,7 +177,7 @@ function scene:create( event )
 
 	player = display.newRect( 0, 0, 20, 40 )
 	player.x = _W/2
-	player.y = 100
+	player.y = 240
 	player:setFillColor( 1,0,0 )
 	physics.addBody( player, "dynamic", {density=5, friction=1, bounce=.3 } )
 	player.isFixedRotation = true
@@ -177,7 +185,7 @@ function scene:create( event )
 
 	column1 = display.newRect( 0, 0, 40, 300 )
 	column1.x = player.x
-	column1.y = player.y+340
+	column1.y = player.y+200
 	column1:setFillColor( 0,1,0 )
 	physics.addBody( column1, "static", {density=1, friction=1, bounce=0 } )
 
@@ -223,6 +231,18 @@ function scene:create( event )
 	column7:setFillColor( 0,1,0 )
 	physics.addBody( column7, "static", {density=1, friction=1, bounce=0} )
 
+	restart = widget.newButton{
+		label="Restart",
+		labelColor = { default={255}, over={128} },
+		defaultFile="button.png",
+		overFile="button-over.png",
+		width=154, height=40,
+		onRelease = restartTouch -- event listener function
+	}
+	restart.x = _W/2
+	restart.y = _H/2
+	restart.alpha = 0
+
 	oneJump = widget.newButton{
 		label="One",
 		labelColor = { default={255}, over={128} },
@@ -249,7 +269,6 @@ function scene:create( event )
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
 	sceneGroup:insert( scoreText )
-	sceneGroup:insert( gameOverText )
 	sceneGroup:insert( column1 )
 	sceneGroup:insert( column2 )
 	sceneGroup:insert( column3 )
@@ -259,6 +278,8 @@ function scene:create( event )
 	sceneGroup:insert( column7 )
 	sceneGroup:insert( oneJump )
 	sceneGroup:insert( twoJump )
+	sceneGroup:insert( restart )
+	sceneGroup:insert( gameOverText )
 
 end
 
@@ -276,7 +297,7 @@ function scene:show( event )
 		-- e.g. start timers, begin animation, play audio, etc.
 		Runtime:addEventListener("enterFrame", moveColumn)
 		player:addEventListener( "collision", makeClickable )
-		local timerCountdown = timer.performWithDelay( 1000, countdownTimer ,0 ) --Starts timer countdown
+		timerCountdown = timer.performWithDelay( 1000, countdownTimer ,0 ) --Starts timer countdown
 	end
 end
 
@@ -293,6 +314,7 @@ function scene:hide( event )
 		physics.stop()
 		Runtime:removeEventListener("enterFrame", moveColumn)
 		player:removeEventListener("collision", makeClickable)
+		timer.cancel( timerCountdown )
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
 	end	
