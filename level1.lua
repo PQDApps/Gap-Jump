@@ -23,6 +23,8 @@ local oneJump --Button that makes character jump once
 local twoJump --Button that makes character jump twice
 local restart --Button that restarts game
 local player --The character/player
+local chaser --The thing that chases the character
+local caught = false --Keeps track if chaser caught player
 local gameOverText
 local column1
 local column2
@@ -35,13 +37,25 @@ local chooseGap = math.random(1,2) --Chooses wether the gap will be short or lon
 local score = 0
 local scoreText
 local gaps = {100,160} --The amount of space between each column
-local countdown = 3 --Countdown of time between jumps
+local countdown = 100 --Countdown of time between jumps
 local isClickable = true --Allows click of buttons
 local timerCountdown
 
 --Functions for the buttons
+function endGame( event )
+	if chaser.x > player.x-30 then
+		print( "IT WORKS!!!!" )
+		player.isFixedRotation = false
+		player:applyLinearImpulse( 100, -100, player.x, player.y )
+	end
+end
+
 function countdownTimer( event )
 	countdown = countdown - 1
+end
+
+function chaserTimer( event )
+	chaser.x = chaser.x + 8
 end
 
 function startPhysics( event )
@@ -63,7 +77,7 @@ function oneTouch(event)
 			score = score + 1
 			scoreText.text = score
 			physics.pause( )
-			transition.to( player, {time=200, y=player.y-25, onComplete=startPhysics  } )
+			transition.to( player, {time=100, y=player.y-25, onComplete=startPhysics  } )
 			transition.to( column1, {time = 200, x = column1.x - 100})
 			transition.to( column2, {time = 200, x = column2.x - 100})
 			transition.to( column3, {time = 200, x = column3.x - 100})
@@ -71,6 +85,7 @@ function oneTouch(event)
 			transition.to( column5, {time = 200, x = column5.x - 100})
 			transition.to( column6, {time = 200, x = column6.x - 100})
 			transition.to( column7, {time = 200, x = column7.x - 100})
+			transition.to( chaser, {time = 200, x = chaser.x - 100})
 			--[[function makeClickable( )
 				isClickable = true
 			end
@@ -88,7 +103,7 @@ function twoTouch( event )
 			score = score + 1
 			scoreText.text = score
 			physics.pause( )
-			transition.to( player, {time=200, y=player.y-25, onComplete=startPhysics  } )
+			transition.to( player, {time=100, y=player.y-25, onComplete=startPhysics  } )
 			transition.to( column1, {time = 200, x = column1.x - 160})
 			transition.to( column2, {time = 200, x = column2.x - 160})
 			transition.to( column3, {time = 200, x = column3.x - 160})
@@ -96,6 +111,7 @@ function twoTouch( event )
 			transition.to( column5, {time = 200, x = column5.x - 160})
 			transition.to( column6, {time = 200, x = column6.x - 160})
 			transition.to( column7, {time = 200, x = column7.x - 160})
+			transition.to( chaser, {time = 200, x = chaser.x - 160})
 			--[[function makeClickable( )
 				isClickable = true
 			end
@@ -140,6 +156,7 @@ function moveColumn( event )
 		column7.x = column6.x + gaps[chooseGap]
 	end
 	if player.y > _H/2+20 then
+		player.isFixedRotation = false
 		gameOverText.alpha = 1	
 		restart.alpha = 1	
 		isClickable = false
@@ -164,7 +181,7 @@ function scene:create( event )
 	background = display.newRect( 0, 0, _W, _H )
 	background.x = _W/2
 	background.y = _H/2
-	background:setFillColor( 52/255, 152/255, 219/255 )
+	background:setFillColor( 9/255, 132/255, 255/255 )
 
 	scoreText = display.newText( score, 0,0, native.systemFont, 50 )
 	scoreText.x = _W/2
@@ -179,10 +196,15 @@ function scene:create( event )
 	player = display.newImageRect( "images/chromie.png", 28, 41 )
 	player.x = _W/2
 	player.y = 240
-	player:setFillColor( 1,0,0 )
 	physics.addBody( player, "dynamic", {density=5, friction=1, bounce=.3 } )
 	player.isFixedRotation = true
 	player.collision = makeClickable
+
+	chaser = display.newCircle( 0, 0, 10 )
+	chaser.x = player.x - 200
+	chaser.y = player.y+20
+	physics.addBody( chaser, "static",{density=1, friction=1, bounce=1, radius=10, isSensor=true } )
+	--chaser.collision = endGame
 
 	column1 = display.newImageRect( "images/column.png", 40, 300 )
 	column1.x = player.x
@@ -243,31 +265,33 @@ function scene:create( event )
 	restart.alpha = 0
 
 	oneJump = widget.newButton{
-		label="One",
+		--label="One",
 		labelColor = { default={255}, over={128} },
-		defaultFile="button.png",
-		overFile="button-over.png",
-		width=154, height=40,
+		--defaultFile="button.png",
+		--overFile="button-over.png",
+		width=_W/2, height=_H,
 		onRelease = oneTouch	-- event listener function
 	}
 	oneJump.x = _W/4
-	oneJump.y = display.contentHeight - 125
+	oneJump.y = _H/2
 
 	twoJump = widget.newButton{
-		label="Two",
+		--label="Two",
 		labelColor = { default={255}, over={128} },
-		defaultFile="button.png",
-		overFile="button-over.png",
-		width=154, height=40,
+		--defaultFile="button.png",
+		--overFile="button-over.png",
+		width=_W/2, height=_H,
 		onRelease = twoTouch	-- event listener function
 	}
 	twoJump.x = _W*.75
-	twoJump.y = display.contentHeight - 125
+	twoJump.y = _H/2
 
 	
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
 	sceneGroup:insert( scoreText )
+	sceneGroup:insert( player )
+	sceneGroup:insert( chaser )
 	sceneGroup:insert( column1 )
 	sceneGroup:insert( column2 )
 	sceneGroup:insert( column3 )
@@ -295,8 +319,11 @@ function scene:show( event )
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
 		Runtime:addEventListener("enterFrame", moveColumn)
+		Runtime:addEventListener("enterFrame", endGame)
 		player:addEventListener( "collision", makeClickable )
+		--chaser:addEventListener( "collision", endGame )
 		timerCountdown = timer.performWithDelay( 1000, countdownTimer ,0 ) --Starts timer countdown
+		timerChaser = timer.performWithDelay( 10, chaserTimer, -1 ) --Timer moves the chaser
 	end
 end
 
@@ -312,8 +339,10 @@ function scene:hide( event )
 		-- e.g. stop timers, stop animation, unload sounds, etc.)
 		physics.stop()
 		Runtime:removeEventListener("enterFrame", moveColumn)
+		Runtime:removeEventListener("enterFrame", endGame)
 		player:removeEventListener("collision", makeClickable)
 		timer.cancel( timerCountdown )
+		timer.cancel( timerChaser )
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
 	end	
