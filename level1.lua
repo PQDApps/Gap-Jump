@@ -10,7 +10,7 @@ local scene = composer.newScene()
 -- include Corona's "physics" library
 local physics = require "physics"
 physics.start()
-physics.setDrawMode("hybrid")	
+--physics.setDrawMode("hybrid")	
 -- include Corona's "widget" library
 local widget = require "widget"
 
@@ -164,7 +164,7 @@ function scene:create( event )
 	background = display.newRect( 0, 0, _W, _H )
 	background.x = _W/2
 	background.y = _H/2
-	background:setFillColor( 0, 0, 1 )
+	background:setFillColor( 52/255, 152/255, 219/255 )
 
 	scoreText = display.newText( score, 0,0, native.systemFont, 50 )
 	scoreText.x = _W/2
@@ -175,7 +175,8 @@ function scene:create( event )
 	gameOverText.y = _H/2
 	gameOverText.alpha = 0
 
-	player = display.newRect( 0, 0, 20, 40 )
+	--player = display.newRect( 0, 0, 20, 40 )
+	player = display.newImageRect( "images/chromie.png", 28, 41 )
 	player.x = _W/2
 	player.y = 240
 	player:setFillColor( 1,0,0 )
@@ -183,49 +184,47 @@ function scene:create( event )
 	player.isFixedRotation = true
 	player.collision = makeClickable
 
-	column1 = display.newRect( 0, 0, 40, 300 )
+	column1 = display.newImageRect( "images/column.png", 40, 300 )
 	column1.x = player.x
 	column1.y = player.y+200
-	column1:setFillColor( 0,1,0 )
 	physics.addBody( column1, "static", {density=1, friction=1, bounce=0 } )
 
 	chooseGap = math.random(1,2)
-	column2 = display.newRect( 0, 0, 40, 300 )
+	column2 = display.newImageRect( "images/column.png", 40, 300 )
 	column2.x = column1.x + gaps[chooseGap]
 	column2.y = column1.y
-	column2:setFillColor( 0,1,0)
 	physics.addBody( column2, "static", {density=1, friction=1, bounce=0 } )
 
 	chooseGap = math.random(1,2)
-	column3 = display.newRect( 0, 0, 40, 300 )
+	column3 = display.newImageRect( "images/column.png", 40, 300 )
 	column3.x = column2.x + gaps[chooseGap]
 	column3.y = column2.y
 	column3:setFillColor( 0,1,0 )
 	physics.addBody( column3, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column4 = display.newRect( 0, 0, 40, 300 )
+	column4 = display.newImageRect( "images/column.png", 40, 300 )
 	column4.x = column3.x + gaps[chooseGap]
 	column4.y = column3.y
 	column4:setFillColor( 0,1,0 )
 	physics.addBody( column4, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column5 = display.newRect( 0, 0, 40, 300 )
+	column5 = display.newImageRect( "images/column.png", 40, 300 )
 	column5.x = column4.x + gaps[chooseGap]
 	column5.y = column4.y
 	column5:setFillColor( 0,1,0 )
 	physics.addBody( column5, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column6 = display.newRect( 0, 0, 40, 300 )
+	column6 = display.newImageRect( "images/column.png", 40, 300 )
 	column6.x = column5.x + gaps[chooseGap]
 	column6.y = column5.y
 	column6:setFillColor( 0,1,0 )
 	physics.addBody( column6, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column7 = display.newRect( 0, 0, 40, 300 )
+	column7 = display.newImageRect( "images/column.png", 40, 300 )
 	column7.x = column6.x + gaps[chooseGap]
 	column7.y = column6.y
 	column7:setFillColor( 0,1,0 )
