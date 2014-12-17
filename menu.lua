@@ -13,6 +13,7 @@ local widget = require "widget"
 --------------------------------------------
 
 -- forward declarations and other locals
+local _W, _H = display.contentWidth, display.contentHeight
 local playBtn
 
 -- 'onRelease' event listener for playBtn
@@ -33,27 +34,31 @@ function scene:create( event )
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
 
 	-- display a background image
-	local background = display.newImageRect( "background.jpg", display.contentWidth, display.contentHeight )
+	local background = display.newImageRect( "images/background.png", _W, _H )
 	background.anchorX = 0
 	background.anchorY = 0
 	background.x, background.y = 0, 0
+	background:setFillColor( 0, 85/255, 170/255 )
 	
 	-- create/position logo/title image on upper-half of the screen
-	local titleLogo = display.newImageRect( "logo.png", 264, 42 )
-	titleLogo.x = display.contentWidth * 0.5
-	titleLogo.y = 100
+	local titleLogo = display.newText("GAP JUMP", 0, 0, "04B_19", 60)
+	titleLogo.x = _W * 0.5
+	titleLogo.y = _H/2-100
+	titleLogo:setFillColor( 53/255,53/255,38/255  )
 	
 	-- create a widget button (which will loads level1.lua on release)
 	playBtn = widget.newButton{
-		label="Play Now",
-		labelColor = { default={255}, over={128} },
-		default="button.png",
-		over="button-over.png",
-		width=154, height=40,
+		label="PLAY",
+		font="04B_19",
+		fontSize = 50,
+		labelColor = { default={255}, over={230} },
+		defaultFile="images/defaultButton.png",
+		overFile="images/overButton.png",
+		width=154, height=80,
 		onRelease = onPlayBtnRelease	-- event listener function
 	}
-	playBtn.x = display.contentWidth*0.5
-	playBtn.y = display.contentHeight - 125
+	playBtn.x = _W*0.5
+	playBtn.y = _H/2+80
 	
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )

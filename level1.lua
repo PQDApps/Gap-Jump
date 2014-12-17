@@ -24,6 +24,7 @@ local twoJump --Button that makes character jump twice
 local restart --Button that restarts game
 local player --The character/player
 local chaser --The thing that chases the character
+local chaserSpeed = 7 --The chasers speed can be changed
 local caught = false --Keeps track if chaser caught player
 local gameOverText
 local column1
@@ -37,9 +38,19 @@ local chooseGap = math.random(1,2) --Chooses wether the gap will be short or lon
 local score = 0
 local scoreText
 local gaps = {100,160} --The amount of space between each column
-local countdown = 100 --Countdown of time between jumps
 local isClickable = true --Allows click of buttons
-local timerCountdown
+local chooseColumn = math.random(1,2) --Chooses a column graphic
+local columns = { --holds all the different images of columns
+	"images/column.png",
+	"images/column2.png",
+	"images/column3.png",
+	"images/column4.png",
+	"images/column5.png",
+	"images/column6.png",
+	"images/column7.png",
+	"images/column8.png",
+}
+local chosen = columns[chooseColumn] --Randomly chosen column to use for the image of each column
 
 --Functions for the buttons
 function endGame( event )
@@ -50,12 +61,18 @@ function endGame( event )
 	end
 end
 
-function countdownTimer( event )
-	countdown = countdown - 1
-end
-
 function chaserTimer( event )
-	chaser.x = chaser.x + 8
+	if score == 10 then
+		chaserSpeed = 8
+		print("Chaser Speed: "..chaserSpeed)
+	elseif score == 30 then
+		chaserSpeed = 9
+		print("Chaser Speed: "..chaserSpeed)
+	elseif score == 50 then
+		chaserSpeed = 10
+		print("Chaser Speed: "..chaserSpeed)
+	end
+	chaser.x = chaser.x + chaserSpeed
 end
 
 function startPhysics( event )
@@ -73,7 +90,6 @@ function oneTouch(event)
 	if event.phase == 'ended' then
 		if isClickable == true then
 			isClickable = false
-			countdown = countdown + 1
 			score = score + 1
 			scoreText.text = score
 			physics.pause( )
@@ -99,7 +115,6 @@ function twoTouch( event )
 	if event.phase == 'ended' then
 		if isClickable == true then
 			isClickable = false
-			countdown = countdown + 1
 			score = score + 1
 			scoreText.text = score
 			physics.pause( )
@@ -126,6 +141,7 @@ function restartTouch( event )
 end
 
 --Move the columns when they get off screen
+--Also end game if player falls and speeds up the chaser
 function moveColumn( event )
 	if column1.x < 0 then
 		chooseGap = math.random(1,2)
@@ -161,11 +177,6 @@ function moveColumn( event )
 		restart.alpha = 1	
 		isClickable = false
 	end
-	if countdown < 1 then
-		gameOverText.alpha = 1	
-		restart.alpha = 1	
-		isClickable = false
-	end
 end
 
 
@@ -178,18 +189,20 @@ function scene:create( event )
 
 	local sceneGroup = self.view
 
-	background = display.newRect( 0, 0, _W, _H )
+	--background = display.newRect( 0, 0, _W, _H )
+	background = display.newImageRect( "images/background.png", _W, _H )
 	background.x = _W/2
 	background.y = _H/2
-	background:setFillColor( 9/255, 132/255, 255/255 )
+	--background:setFillColor( 9/255, 132/255, 255/255 )
 
-	scoreText = display.newText( score, 0,0, native.systemFont, 50 )
+	scoreText = display.newText( score, 0,0, "04B_19", 70 )
 	scoreText.x = _W/2
-	scoreText.y = 50
+	scoreText.y = 70
+	scoreText:setFillColor( 53/255,53/255,38/255 )
 
 	gameOverText = display.newText( "GAME OVER", _W/2, _H/2, native.systemFont, 50 )
 	gameOverText.x = _W/2
-	gameOverText.y = _H/2
+	gameOverText.y = _H/2-100
 	gameOverText.alpha = 0
 
 	--player = display.newRect( 0, 0, 20, 40 )
@@ -206,58 +219,60 @@ function scene:create( event )
 	physics.addBody( chaser, "static",{density=1, friction=1, bounce=1, radius=10, isSensor=true } )
 	--chaser.collision = endGame
 
-	column1 = display.newImageRect( "images/column.png", 40, 300 )
+	column1 = display.newImageRect( chosen, 40, 300 )
 	column1.x = player.x
 	column1.y = player.y+200
 	physics.addBody( column1, "static", {density=1, friction=1, bounce=0 } )
 
 	chooseGap = math.random(1,2)
-	column2 = display.newImageRect( "images/column.png", 40, 300 )
+	column2 = display.newImageRect( chosen, 40, 300 )
 	column2.x = column1.x + gaps[chooseGap]
 	column2.y = column1.y
 	physics.addBody( column2, "static", {density=1, friction=1, bounce=0 } )
 
 	chooseGap = math.random(1,2)
-	column3 = display.newImageRect( "images/column.png", 40, 300 )
+	column3 = display.newImageRect( chosen, 40, 300 )
 	column3.x = column2.x + gaps[chooseGap]
 	column3.y = column2.y
-	column3:setFillColor( 0,1,0 )
+	--column3:setFillColor( 0,1,0 )
 	physics.addBody( column3, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column4 = display.newImageRect( "images/column.png", 40, 300 )
+	column4 = display.newImageRect( chosen, 40, 300 )
 	column4.x = column3.x + gaps[chooseGap]
 	column4.y = column3.y
-	column4:setFillColor( 0,1,0 )
+	--column4:setFillColor( 0,1,0 )
 	physics.addBody( column4, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column5 = display.newImageRect( "images/column.png", 40, 300 )
+	column5 = display.newImageRect( chosen, 40, 300 )
 	column5.x = column4.x + gaps[chooseGap]
 	column5.y = column4.y
-	column5:setFillColor( 0,1,0 )
+	--column5:setFillColor( 0,1,0 )
 	physics.addBody( column5, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column6 = display.newImageRect( "images/column.png", 40, 300 )
+	column6 = display.newImageRect( chosen, 40, 300 )
 	column6.x = column5.x + gaps[chooseGap]
 	column6.y = column5.y
-	column6:setFillColor( 0,1,0 )
+	--column6:setFillColor( 0,1,0 )
 	physics.addBody( column6, "static", {density=1, friction=1, bounce=0} )
 
 	chooseGap = math.random(1,2)
-	column7 = display.newImageRect( "images/column.png", 40, 300 )
+	column7 = display.newImageRect( chosen, 40, 300 )
 	column7.x = column6.x + gaps[chooseGap]
 	column7.y = column6.y
-	column7:setFillColor( 0,1,0 )
+	--column7:setFillColor( 0,1,0 )
 	physics.addBody( column7, "static", {density=1, friction=1, bounce=0} )
 
 	restart = widget.newButton{
-		label="Restart",
+		label="RESTART",
+		font="04B_19",
+		fontSize=30,
 		labelColor = { default={255}, over={128} },
-		defaultFile="button.png",
-		overFile="button-over.png",
-		width=154, height=40,
+		defaultFile="images/defaultButton.png",
+		overFile="images/overButton.png",
+		width=154, height=60,
 		onRelease = restartTouch -- event listener function
 	}
 	restart.x = _W/2
@@ -322,7 +337,6 @@ function scene:show( event )
 		Runtime:addEventListener("enterFrame", endGame)
 		player:addEventListener( "collision", makeClickable )
 		--chaser:addEventListener( "collision", endGame )
-		timerCountdown = timer.performWithDelay( 1000, countdownTimer ,0 ) --Starts timer countdown
 		timerChaser = timer.performWithDelay( 10, chaserTimer, -1 ) --Timer moves the chaser
 	end
 end
@@ -341,7 +355,6 @@ function scene:hide( event )
 		Runtime:removeEventListener("enterFrame", moveColumn)
 		Runtime:removeEventListener("enterFrame", endGame)
 		player:removeEventListener("collision", makeClickable)
-		timer.cancel( timerCountdown )
 		timer.cancel( timerChaser )
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
